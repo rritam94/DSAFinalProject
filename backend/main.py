@@ -1,5 +1,5 @@
-from countingSort import countingSort
-from countingSort import countingSort_tup
+from backend.countingSort import countingSort
+from backend.countingSort import countingSort_tup
 from data_files.read_files import read_fruit_prices
 
 if __name__ == '__main__':
