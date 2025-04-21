@@ -1,10 +1,5 @@
 import sys
 
-
-
-
-
-
 def str_sort(lst, str_i, maxL):
     if maxL == str_i or len(lst) == 1: # Base case: O(1)
         return lst
