@@ -1,0 +1,59 @@
+.feed {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  border-left: 1px solid #eff3f4;
+  border-right: 1px solid #eff3f4;
+}
+
+.feed-header {
+  position: sticky;
+  top: 60px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  z-index: 10;
+  padding: 16px;
+  border-bottom: 1px solid #eff3f4;
+}
+
+.feed-header h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.loading, .error, .end-message {
+  padding: 20px;
+  text-align: center;
+  color: #536471;
+}
+
+.error {
+  color: #e0245e;
+}
+
+.load-more {
+  padding: 20px;
+  text-align: center;
+}
+
+.load-more button {
+  background-color: #1da1f2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.load-more button:hover {
+  background-color: #1a91da;
+}
+
+@media (max-width: 768px) {
+  .feed {
+    max-width: 100%;
+    border: none;
+  }
+} 
