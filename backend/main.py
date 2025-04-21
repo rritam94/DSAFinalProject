@@ -1,19 +1,46 @@
-from countingSort import countingSort
-from countingSort import countingSort_tup
+from backend.countingSort import countingSort
+from backend.countingSort import countingSort_tup
 from data_files.read_files import read_fruit_prices
+import random
+import time
+
+
+
+
+
+
+def generate_random_integers(count, min_value, max_value):
+    return [random.randint(min_value, max_value) for _ in range(count)]
+
+
+
 
 if __name__ == '__main__':
+    random_integers = generate_random_integers(100000, -100, 100)
+
+    start_countingSort = time.time()
+    countingSort_result = countingSort(random_integers)
+    end_countingSort = time.time()
+    countingSort_time = end_countingSort - start_countingSort
+
+    start_sorted = time.time()
+    sort_result = sorted(random_integers)
+    end_sorted = time.time()
+    sorted_time = end_sorted - start_sorted
+
+
+    print(f"CountingSort Time: " + str(countingSort_time))
+    print(f"Built-in Sorted Time: " + str(sorted_time))
+    print("Results match: " + str(countingSort_result == sort_result))
+
 
     ok = read_fruit_prices()
-    words = []
-    prices = []
 
 
-    try:
-        print(countingSort(prices))
-        print(countingSort_tup(ok, 1))
-    except Exception as e:
-        print(e)
+    # try:
+    #     print(countingSort_tup(ok, 1))
+    # except Exception as e:
+    #     print(e)
 
     # try:
     #     print(countingSort(['cab', 'cba', 'ass', 'abc','abb', 'bc', 'ba', 'bbc', 'bda', 'bea', 'bf']))

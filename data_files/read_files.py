@@ -1,6 +1,6 @@
 import csv
 def read_fruit_prices():
-    filePath = "data_files/Fruit-Prices-2022.csv"
+    filePath = "../data_files/Fruit-Prices-2022.csv"
     pricelst = []
 
 
