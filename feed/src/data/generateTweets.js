@@ -108,7 +108,7 @@ const generateTweet = (id, user, timestamp) => {
 };
 
 const generateTweetDataset = (tweetCount = 100000) => {
-  const userCount = Math.max(Math.floor(tweetCount / 10), 1000); 
+  const userCount = Math.max(Math.floor(tweetCount / 10), 1000);
   const users = generateUserData(userCount);
   const tweets = [];
   
