@@ -11,25 +11,40 @@ const Feed = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
+      setLoading(true);
       try {
-        const response = await import('../data/tweets.json');
+        const response = await import('../data/twitter_sample_100k.json');
         const data = response.default;
 
         const postsPerPage = 20;
         const startIndex = (page - 1) * postsPerPage;
         const endIndex = startIndex + postsPerPage;
-        const newPosts = data.slice(startIndex, endIndex);
-        
-        if (newPosts.length === 0) {
+        const newPostsRaw = data.slice(startIndex, endIndex);
+
+        if (newPostsRaw.length === 0) {
           setHasMore(false);
         } else {
-          setPosts(prevPosts => [...prevPosts, ...newPosts]);
+          const newPosts = newPostsRaw.map(rawPost => ({
+            id: String(rawPost.id),
+            username: rawPost.user,
+            displayName: rawPost.user,
+            content: rawPost.tweet,
+            timestamp: rawPost.date,
+            likes: parseInt(rawPost.likes) || 0,
+            retweets: parseInt(rawPost.retweets) || 0,
+            replies: parseInt(rawPost.replies) || 0,
+          }));
+
+          const validPosts = newPosts.filter(p => p.id && p.username && p.content && p.timestamp);
+
+          setPosts(prevPosts => [...prevPosts, ...validPosts]);
         }
-        
-        setLoading(false);
+
       } catch (err) {
         console.error('Error loading posts:', err);
         setError('Failed to load posts. Please try again later.');
+        setHasMore(false);
+      } finally {
         setLoading(false);
       }
     };
@@ -40,12 +55,10 @@ const Feed = () => {
   }, [page, hasMore]);
 
   const handleLoadMore = () => {
-    setPage(prevPage => prevPage + 1);
+    if (!loading) {
+      setPage(prevPage => prevPage + 1);
+    }
   };
-
-  if (loading && page === 1) {
-    return <div className="loading">Loading posts...</div>;
-  }
 
   if (error) {
     return <div className="error">{error}</div>;
@@ -56,24 +69,27 @@ const Feed = () => {
       <div className="feed-header">
         <h2>Home</h2>
       </div>
-      
+
       <div className="posts">
         {posts.map(post => (
           <Post key={post.id} post={post} />
         ))}
       </div>
-      
-      {loading && <div className="loading">Loading more posts...</div>}
-      
+
+      {loading && page > 1 && <div className="loading">Loading more posts...</div>}
+
       {!loading && hasMore && (
         <div className="load-more">
           <button onClick={handleLoadMore}>Load More</button>
         </div>
       )}
-      
-      {!hasMore && (
+
+      {!loading && !hasMore && posts.length > 0 && (
         <div className="end-message">You've reached the end of the feed.</div>
       )}
+      
+      {loading && page === 1 && posts.length === 0 && <div className="loading">Loading posts...</div>}
+      {!loading && !hasMore && posts.length === 0 && <div className="end-message">No posts to display.</div>}
     </div>
   );
 };
