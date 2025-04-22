@@ -9,8 +9,16 @@ def sort_by_date(data):
         twitter_data = data
     
     def get_date(item):
-        date_str = item.get('created_at')
-        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+        date_str = item.get('timestamp')
+        if not date_str:
+            return datetime.min
+        try:
+            if date_str.endswith('Z'):
+                return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            return datetime.fromisoformat(date_str)
+        except ValueError:
+            print(f"Warning: Could not parse date: {date_str}")
+            return datetime.min
     
     def heapify_by_date(arr, n, i):
         largest = i

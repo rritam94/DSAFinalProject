@@ -7,7 +7,7 @@ def str_sort(lst, str_i, maxL):
 
 
     for i in range(len(lst)):  # O(len(lst))
-        if str_i >= len(lst[i]): #if index out of range
+        if str_i >= len(lst[i]) or not lst[i]:
             subList[27].append(lst[i]) #treat it as a space
         else:
             if lst[i][str_i] == ',':  # char a comma, append to 27th spot
@@ -17,7 +17,7 @@ def str_sort(lst, str_i, maxL):
             elif 'a' <= lst[i][str_i] <= 'z':  # Only process lowercase letters
                 subList[ord(lst[i][str_i]) - 97].append(lst[i])
             else:
-                print("UH OH, idk that character" + lst[i][str_i])
+                subList[27].append(lst[i])
 
     result = []
     for i in range(len(subList)): #O(28)
@@ -51,7 +51,13 @@ def countingSort_tup(data, tup_i): #overload for list of tupples
     myDict = {}
     for i in range(len(data)):  # O(len(data))
         subData.append(data[i][tup_i])  # O(1) per iteration
-        myDict[data[i][tup_i]] = data[i]  # O(1) per iteration (assuming average-case dictionary insert) O(n) worst case
+        if data[i][tup_i] in myDict:
+            if isinstance(myDict[data[i][tup_i]], list):
+                myDict[data[i][tup_i]].append(data[i])
+            else:
+                myDict[data[i][tup_i]] = [myDict[data[i][tup_i]], data[i]]
+        else:
+            myDict[data[i][tup_i]] = data[i]
 #end 2nd section
 
 #3rd section - sort the data
@@ -61,7 +67,11 @@ def countingSort_tup(data, tup_i): #overload for list of tupples
 #4th section - create the result
     result = []
     for i in range(len(subData)): #O(len(subData)) = O(len(data))
-        result.append(myDict[subData[i]]) # O(1) per iteration (assuming average-case dictionary lookup) O(n) worst case
+        item = myDict[subData[i]]
+        if isinstance(item, list):
+            result.extend(item)
+        else:
+            result.append(item)
     return result
 
 
@@ -116,16 +126,25 @@ def countingSort(data):
         myList = [[] for _ in range(28)]   #for each letter and a space
         maxL = 0 #max str length
         for i in range(len(data)): #O(len(data))
+            if not data[i]:
+                data[i] = ""
+                
             data[i] = data[i].lower()
             if len(data[i]) > maxL: maxL = len(data[i])
 
+            if not data[i]:
+                myList[27].append(data[i])
+                continue
+                
             #sort strings by first charecter
             if data[i][0] == ',': #first char a comma, append to 27th spot
                 myList[26].append(data[i])
             elif data[i][0] == ' ':  # first char a space, append to 28th spot
                 myList[27].append(data[i])
-            else:
+            elif 'a' <= data[i][0] <= 'z':  # Only process lowercase letters
                 myList[ord(data[i][0]) - 97].append(data[i])
+            else:
+                myList[27].append(data[i])
 
         result = []
         for i in range(len(myList)): #O(28)

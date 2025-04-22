@@ -4,16 +4,20 @@
   min-height: 100vh;
 }
 
+.app-content {
+  display: flex;
+  flex: 1;
+}
+
 .main-content {
   flex: 1;
-  display: flex;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
 }
 
 @media (max-width: 768px) {
+  .app-content {
+    flex-direction: column-reverse;
+  }
   .main-content {
-    flex-direction: column;
+    /*No changes needed here for mobile stacking */
   }
 } 

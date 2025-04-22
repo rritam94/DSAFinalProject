@@ -1,0 +1,90 @@
+.sort-panel {
+  width: 250px;
+  padding: 20px;
+  border-left: 1px solid #eff3f4;
+  background-color: #ffffff;
+  height: calc(100vh - 60px);
+  position: sticky;
+  top: 60px;
+  overflow-y: auto;
+}
+
+.sort-panel h3 {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: #0f1419;
+}
+
+.sort-group {
+  margin-bottom: 25px;
+}
+
+.sort-group h4 {
+  font-size: 1rem;
+  color: #536471;
+  margin-bottom: 10px;
+}
+
+.sort-panel button {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border: 1px solid #cfd9de;
+  border-radius: 20px;
+  background-color: #ffffff;
+  color: #0f1419;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.sort-panel button:hover {
+  background-color: #f7f9f9;
+}
+
+.sort-panel button.active {
+  background-color: #1da1f2;
+  color: #ffffff;
+  border-color: #1da1f2;
+  font-weight: 700;
+}
+
+.confirm-sort-button {
+  background-color: #17bf63;
+  color: #ffffff;
+  border-color: #17bf63;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.confirm-sort-button:hover {
+  background-color: #13a452;
+  border-color: #13a452;
+}
+
+.sort-time {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eff3f4;
+  color: #536471;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 992px) {
+  .sort-panel {
+    width: 200px;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sort-panel {
+    width: 100%;
+    position: static;
+    height: auto;
+    border-left: none;
+    border-bottom: 1px solid #eff3f4;
+  }
+} 

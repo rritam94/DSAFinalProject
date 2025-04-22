@@ -21,6 +21,22 @@
   font-weight: 700;
 }
 
+.loading-sort {
+  display: inline-block;
+  margin-left: 15px;
+  font-size: 0.9rem;
+  color: #1da1f2;
+  font-style: italic;
+}
+
+.feed-error {
+  display: inline-block;
+  margin-left: 15px;
+  font-size: 0.9rem;
+  color: #e0245e;
+  font-weight: 500;
+}
+
 .loading, .error, .end-message {
   padding: 20px;
   text-align: center;
