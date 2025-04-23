@@ -7,6 +7,7 @@ from heap_sort import sort_by_date as heap_sort_by_date, sort_by_string as heap_
 from counting_sort import sort_by_date as counting_sort_by_date, sort_by_string as counting_sort_by_string, sort_by_number as counting_sort_by_number
 
 
+# function to get the date from the tweet
 def get_date_key(tweet_data):
     timestamp_string = tweet_data.get('timestamp')
     
@@ -21,12 +22,14 @@ def get_date_key(tweet_data):
         return None
 
 
+# function to get the user from the tweet
 def get_user_key(tweet_data):
     username = tweet_data.get('username')
     
     return username.lower() if username else ''
 
 
+# function to get the likes from the tweet
 def get_likes_key(tweet_data):
     try:
         return int(tweet_data.get('likes', 0))
@@ -35,6 +38,7 @@ def get_likes_key(tweet_data):
         return 0
 
 
+# function to get the retweets from the tweet
 def get_retweets_key(tweet_data):
     try:
         return int(tweet_data.get('retweets', 0))
@@ -43,6 +47,7 @@ def get_retweets_key(tweet_data):
         return 0
 
 
+# function to get the replies from the tweet
 def get_replies_key(tweet_data):
     try:
         return int(tweet_data.get('replies', 0))
@@ -51,6 +56,7 @@ def get_replies_key(tweet_data):
         return 0
 
 
+# function to get the id from the tweet
 def get_id_key(tweet_data):
     try:
         return int(float(tweet_data.get('id', 0)))
@@ -63,6 +69,7 @@ app = Flask(__name__)
 CORS(app)
 
 
+# route to sort the tweets
 @app.route('/sort', methods=['POST'])
 def sort_tweets():
     try:

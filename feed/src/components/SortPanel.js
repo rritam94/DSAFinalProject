@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/SortPanel.css';
 
-//control panel
+// sort panel component
 const SortPanel = ({ 
   onSort, 
   sortTime,
@@ -11,27 +11,39 @@ const SortPanel = ({
   setCriteria,
   onRestore
 }) => {
-  //sorting options
-  const criteriaOptions = ['date', 'user', 'likes', 'retweets', 'replies', 'id'];
+  // criteria options
+  const criteriaOptions = ['date', 'user', 'likes', 'retweets', 'replies'];
+  // algorithm options
   const algorithmOptions = ['heap', 'counting'];
 
-  //updated the selected options
+  // local criteria and algorithm
+  const [localCriteria, setLocalCriteria] = React.useState(currentCriteria);
+  const [localAlgorithm, setLocalAlgorithm] = React.useState(currentAlgorithm);
+
+  // useEffect to set the local criteria and algorithm
+  React.useEffect(() => {
+    setLocalCriteria(currentCriteria);
+    setLocalAlgorithm(currentAlgorithm);
+  }, []);
+
+  // handle criteria click
   const handleCriteriaClick = (crit) => {
     setLocalCriteria(crit);
   };
 
-  //updated algo
+  // handle algorithm click
   const handleAlgoClick = (algo) => {
     setLocalAlgorithm(algo);
   }
 
-  //init actual sort operation
+  // handle confirm sort
   const handleConfirmSort = () => {
     setCriteria(localCriteria);
     setAlgorithm(localAlgorithm);
     onSort(localAlgorithm, localCriteria);
   };
 
+  // handle restore original
   const handleRestoreOriginal = () => {
     setLocalCriteria('date');
     setLocalAlgorithm('heap');
@@ -49,8 +61,8 @@ const SortPanel = ({
   return (
     <div className="sort-panel">
       <h3>Sort Tweets</h3>
-      
-      {/*algo select buttons*/}
+
+      {/* sort group */}
       <div className="sort-group">
         <h4>Algorithm:</h4>
         {algorithmOptions.map(algo => (
@@ -64,7 +76,6 @@ const SortPanel = ({
         ))}
       </div>
 
-      {/*Criteria select buttons*/}
       <div className="sort-group">
         <h4>Criteria:</h4>
         {criteriaOptions.map(crit => (
@@ -78,7 +89,6 @@ const SortPanel = ({
         ))}
       </div>
 
-      {/*performance display + sort button*/}
       <button className="confirm-sort-button" onClick={handleConfirmSort}>
         Sort Now
       </button>

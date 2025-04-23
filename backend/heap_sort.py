@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+# function to get the date from the tweet
 def get_date(tweet):
     timestamp_string = tweet.get('timestamp')
     
@@ -15,7 +16,9 @@ def get_date(tweet):
     
     except ValueError:
         print('cant parse date')
-    
+
+
+# function to heapify the tweets by date
 def heapify_by_date(tweets_array, size, root_index):
     largest_index = root_index
     left_child = 2 * root_index + 1
@@ -23,7 +26,7 @@ def heapify_by_date(tweets_array, size, root_index):
     
     if left_child < size and get_date(tweets_array[left_child]) > get_date(tweets_array[largest_index]):
         largest_index = left_child
-        
+            
     if right_child < size and get_date(tweets_array[right_child]) > get_date(tweets_array[largest_index]):
         largest_index = right_child
         
@@ -31,6 +34,8 @@ def heapify_by_date(tweets_array, size, root_index):
         tweets_array[root_index], tweets_array[largest_index] = tweets_array[largest_index], tweets_array[root_index]
         heapify_by_date(tweets_array, size, largest_index)
 
+
+# function to sort the tweets by date
 def heap_sort_by_date(tweets_array):
     array_length = len(tweets_array)
     
@@ -43,6 +48,13 @@ def heap_sort_by_date(tweets_array):
     
     return tweets_array
 
+
+# function to sort the tweets by user
+def get_string(user_data):
+    return user_data.get('name', '').lower()    
+
+
+# function to heapify the tweets by user    
 def sort_by_date(data):
     if isinstance(data, str):
         with open(data, 'r') as file:
@@ -52,6 +64,8 @@ def sort_by_date(data):
     
     return heap_sort_by_date(twitter_data)
 
+
+# function to heapify the tweets by string
 def heapify(array, size, root_index):
     largest_index = root_index 
     left_child = 2 * root_index + 1 
@@ -67,6 +81,8 @@ def heapify(array, size, root_index):
         array[root_index], array[largest_index] = array[largest_index], array[root_index]
         heapify(array, size, largest_index)
 
+
+# function to sort the tweets by string
 def heapSort(array):
     array_length = len(array) 
     
@@ -77,9 +93,15 @@ def heapSort(array):
         array[0], array[index] = array[index], array[0] 
         heapify(array, index, 0)
 
+    return array
+
+
+# function to get the string from the tweet
 def get_string(user_data):
     return user_data.get('name', '').lower()
 
+
+# function to heapify the tweets by string
 def heapify_by_string(users_array, size, root_index):
     largest_index = root_index
     left_child = 2 * root_index + 1
@@ -95,6 +117,8 @@ def heapify_by_string(users_array, size, root_index):
         users_array[root_index], users_array[largest_index] = users_array[largest_index], users_array[root_index]
         heapify_by_string(users_array, size, largest_index)
 
+
+# function to sort the tweets by string
 def heap_sort_by_string(users_array):
     array_length = len(users_array)
     
@@ -107,6 +131,8 @@ def heap_sort_by_string(users_array):
     
     return users_array
 
+
+# function to sort the tweets by string
 def sort_by_string(data):
     if isinstance(data, str):
         with open(data, 'r') as file:
@@ -116,6 +142,8 @@ def sort_by_string(data):
     
     return heap_sort_by_string(user_records)
 
+
+# function to get the number from the tweet
 def get_number(item_data, key_name):
     try:
         return int(item_data.get(key_name, 0))
@@ -123,6 +151,8 @@ def get_number(item_data, key_name):
     except (ValueError, TypeError):
         return 0
 
+
+# function to heapify the tweets by number
 def heapify_by_number(data_array, size, root_index, key_name):
     largest_index = root_index
     left_child = 2 * root_index + 1
@@ -138,6 +168,8 @@ def heapify_by_number(data_array, size, root_index, key_name):
         data_array[root_index], data_array[largest_index] = data_array[largest_index], data_array[root_index]
         heapify_by_number(data_array, size, largest_index, key_name)
 
+
+# function to sort the tweets by number
 def heap_sort_by_number(data_array, key_name):
     array_length = len(data_array)
     
@@ -150,6 +182,8 @@ def heap_sort_by_number(data_array, key_name):
     
     return data_array
 
+
+# function to sort the tweets by number (likes, retweets, replies, id)
 def sort_by_number(data, key_name):
     if isinstance(data, str):
         with open(data, 'r') as file:
@@ -158,4 +192,3 @@ def sort_by_number(data, key_name):
         numerical_data = data
     
     return heap_sort_by_number(numerical_data, key_name)
-
