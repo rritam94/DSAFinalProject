@@ -25,3 +25,5 @@ cd feed
 npm install
 npm start
 ```
+
+P.S Rocita Rana is Ritam. I'm using my sister's computer.
