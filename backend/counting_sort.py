@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-
+# function to get the date from the tweet
 def get_date(tweet):
     timestamp_string = tweet.get('timestamp')
     
@@ -19,6 +19,7 @@ def get_date(tweet):
         return datetime.min
 
 
+# function to sort the tweets by date
 def sort_by_date(data):
     if isinstance(data, str):
         with open(data, 'r') as file:
