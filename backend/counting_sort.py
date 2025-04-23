@@ -2,162 +2,221 @@ import json
 from datetime import datetime
 
 # function to get the date from the tweet
-def get_date(tweet):
-    timestamp_string = tweet.get('timestamp')
+def get_date(tweet_data):
+    timestamp = tweet_data.get('timestamp', '')
     
-    if not timestamp_string:
+    if not timestamp:
         return datetime.min
     
     try:
-        if timestamp_string.endswith('Z'):
-            return datetime.fromisoformat(timestamp_string.replace('Z', '+00:00'))
-        
-        return datetime.fromisoformat(timestamp_string)
+        if timestamp.endswith('Z'):
+            timestamp = timestamp[:-1] + '+00:00'
+            
+        return datetime.fromisoformat(timestamp)
     
     except ValueError:
-        print("can't parse date")
         return datetime.min
 
+# function to sort the records by date
+def counting_sort(input_records, key_function, minimum_value, maximum_value):
+    array_size = maximum_value - minimum_value + 1
+    frequency_counts = [0] * array_size
+    
+    i = 0
+    while i < len(input_records):
+        record = input_records[i]
+        frequency_counts[key_function(record) - minimum_value] += 1
+        i += 1
+    
+    index = 1
+    while index < array_size:
+        frequency_counts[index] += frequency_counts[index - 1]
+        index += 1
+    
+    result_array = [None] * len(input_records)
+    
+    i = len(input_records) - 1
+    while i >= 0:
+        record = input_records[i]
+        key_value = key_function(record) - minimum_value
+        frequency_counts[key_value] -= 1
+        result_array[frequency_counts[key_value]] = record
+        i -= 1
+    
+    return result_array
 
 # function to sort the tweets by date
 def sort_by_date(data):
     if isinstance(data, str):
-        with open(data, 'r') as file:
-            twitter_data = json.load(file)
+        with open(data) as file_handle:
+            tweets = json.load(file_handle)
+    
     else:
-        twitter_data = data.copy()
+        tweets = data.copy()
     
+    records = [(tweet, get_date(tweet)) for tweet in tweets]
 
-    date_buckets = {}
+    records = counting_sort(records, lambda rec: rec[1].second,0,59)
+    records = counting_sort(records,lambda rec: rec[1].minute,0,59)
     
-    for tweet in twitter_data:
-        tweet_date = get_date(tweet)
-        
-        if tweet_date not in date_buckets:
-            date_buckets[tweet_date] = []
-        
-        date_buckets[tweet_date].append(tweet)
+    records = counting_sort(records,lambda rec: rec[1].hour,0,23)
     
-
-    if not date_buckets:
-        return twitter_data
+    records = counting_sort(records,lambda rec: rec[1].day,1,31)
     
+    records = counting_sort(records,lambda rec: rec[1].month,1,12)
 
-    sorted_results = []
-    sorted_dates = sorted(date_buckets.keys())
+    years = [date_time.year for _, date_time in records]
+    min_year, max_year = min(years), max(years)
     
-    for single_date in sorted_dates:
-        tweets_on_date = date_buckets[single_date]
-        
-        for tweet in tweets_on_date:
-            sorted_results.append(tweet)
-    
-    return sorted_results
+    records = counting_sort(records,lambda rec: rec[1].year,min_year, max_year)
 
+    return [tweet for tweet, _ in records]
 
-
+# function to get the string from the user
 def get_string(user_data):
     return user_data.get('name', '').lower()
 
-
+# function to sort the users by string
 def sort_by_string(data):
     if isinstance(data, str):
-        with open(data, 'r') as file:
-            user_records = json.load(file)
+        with open(data, 'r') as file_handle:
+            user_records = json.load(file_handle)
+    
     else:
         user_records = data.copy()
     
-
-    alphabet_buckets = {}
+    if not user_records:
+        return []
     
-    for user in user_records:
-        name_value = get_string(user)
-        first_letter = name_value[0] if name_value else ''
-        sorted_results = []
+    all_names = []
     
-        if first_letter not in alphabet_buckets:
-            alphabet_buckets[first_letter] = []
-            
-        alphabet_buckets[first_letter].append(user)
+    i = 0
+    while i < len(user_records):
+        user = user_records[i]
+        name = get_string(user)
+        all_names.append(name)
+        i += 1
     
-
-    sorted_letters = sorted(alphabet_buckets.keys())
+    max_length = 0
     
-    for letter in sorted_letters:
-        users_with_letter = alphabet_buckets[letter]
-        users_with_letter.sort(key=get_string)
+    i = 0
+    while i < len(all_names):
+        name = all_names[i]
+        if len(name) > max_length:
+            max_length = len(name)
+        i += 1
+    
+    sorted_records = user_records.copy()
+    
+    char_position = max_length - 1
+    while char_position >= 0:
+        char_counts = [0] * 256
         
-        for user in users_with_letter:
-            sorted_results.append(user)
+        i = 0
+        while i < len(sorted_records):
+            user = sorted_records[i]
+            name = get_string(user)
+            char_code = 0
+            
+            if char_position < len(name):
+                char_code = ord(name[char_position])
+                
+            char_counts[char_code] += 1
+            i += 1
+        
+        i = 1
+        while i < 256:
+            char_counts[i] += char_counts[i-1]
+            i += 1
+        
+        output_array = [None] * len(sorted_records)
+        
+        i = len(sorted_records) - 1
+        while i >= 0:
+            name = get_string(sorted_records[i])
+            char_code = 0
+            
+            if char_position < len(name):
+                char_code = ord(name[char_position])
+                
+            index = char_counts[char_code] - 1
+            output_array[index] = sorted_records[i]
+            char_counts[char_code] -= 1
+            i -= 1
+        
+        sorted_records = output_array
+        char_position -= 1
     
-    return sorted_results
+    return sorted_records
 
 
+# function to sort by number
 def sort_by_number(data, key_name):
     if isinstance(data, str):
-        with open(data, 'r') as file:
-            numerical_data = json.load(file)
+        with open(data, 'r') as file_handle:
+            numerical_data = json.load(file_handle)
+    
     else:
         numerical_data = data.copy()
     
-
-    def get_number(item_data):
-        try:
-            return int(item_data.get(key_name, 0))
-        
-        except (ValueError, TypeError):
-            return 0
-    
-
     if not numerical_data:
         return []
+    
+    number_values = []
+    
+    i = 0
+    while i < len(numerical_data):
+        item = numerical_data[i]
+        try:
+            number = int(item.get(key_name, 0))
         
-
-    smallest_value = float('inf')
-    largest_value = float('-inf')
+        except (ValueError, TypeError):
+            number = 0
+            
+        number_values.append(number)
+        i += 1
     
-    for data_item in numerical_data:
-        numerical_value = get_number(data_item)
-        smallest_value = min(smallest_value, numerical_value)
-        largest_value = max(largest_value, numerical_value)
+    min_number = min(number_values)
+    max_number = max(number_values)
+    range_size = max_number - min_number + 1
     
-
-    range_too_large = largest_value - smallest_value > 1_000_000
+    frequency_counts = []
     
-    if range_too_large:
-        return sorted(numerical_data, key=get_number)
+    i = 0
+    while i < range_size:
+        frequency_counts.append(0)
+        i += 1
     
-
-    count_array = []
+    i = 0
+    while i < len(number_values):
+        num = number_values[i]
+        index = num - min_number
+        frequency_counts[index] += 1
+        i += 1
     
-    for i in range(largest_value - smallest_value + 1):
-        count_array.append(0)
+    i = 1
+    while i < range_size:
+        frequency_counts[i] += frequency_counts[i-1]
+        i += 1
     
-
-    for data_item in numerical_data:
-        numerical_value = get_number(data_item)
-        adjusted_index = numerical_value - smallest_value
-        count_array[adjusted_index] += 1
+    result_array = []
     
-
-    value_buckets = []
+    i = 0
+    while i < len(numerical_data):
+        result_array.append(None)
+        i += 1
     
-    for i in range(largest_value - smallest_value + 1):
-        value_buckets.append([])
+    i = len(numerical_data) - 1
+    while i >= 0:
+        try:
+            number = int(numerical_data[i].get(key_name, 0))
         
-
-    for data_item in numerical_data:
-        numerical_value = get_number(data_item)
-        adjusted_index = numerical_value - smallest_value
-        value_buckets[adjusted_index].append(data_item)
+        except (ValueError, TypeError):
+            number = 0
+            
+        index = frequency_counts[number - min_number] - 1
+        result_array[index] = numerical_data[i]
+        frequency_counts[number - min_number] -= 1
+        i -= 1
     
-
-    sorted_results = []
-    
-    for bucket_index in range(len(value_buckets)):
-        current_bucket = value_buckets[bucket_index]
-        
-        for data_item in current_bucket:
-            sorted_results.append(data_item)
-    
-    return sorted_results
+    return result_array
