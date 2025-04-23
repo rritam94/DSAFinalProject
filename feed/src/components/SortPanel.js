@@ -1,6 +1,7 @@
 import React from 'react';
 import '../styles/SortPanel.css';
 
+//control panel
 const SortPanel = ({ 
   onSort, 
   sortTime,
@@ -9,17 +10,21 @@ const SortPanel = ({
   setAlgorithm,
   setCriteria
 }) => {
+  //sorting options
   const criteriaOptions = ['date', 'user', 'likes', 'retweets', 'replies', 'id'];
   const algorithmOptions = ['heap', 'counting'];
 
+  //updated the selected options
   const handleCriteriaClick = (crit) => {
     setCriteria(crit); 
   };
 
+  //updated algo
   const handleAlgoClick = (algo) => {
     setAlgorithm(algo);
   }
 
+  //init actual sort operation
   const handleConfirmSort = () => {
     onSort(currentAlgorithm, currentCriteria);
   };
@@ -28,6 +33,7 @@ const SortPanel = ({
     <div className="sort-panel">
       <h3>Sort Tweets</h3>
       
+      {/*algo select buttons*/}
       <div className="sort-group">
         <h4>Algorithm:</h4>
         {algorithmOptions.map(algo => (
@@ -41,6 +47,7 @@ const SortPanel = ({
         ))}
       </div>
 
+      {/*Criteria select buttons*/}
       <div className="sort-group">
         <h4>Criteria:</h4>
         {criteriaOptions.map(crit => (
@@ -54,7 +61,7 @@ const SortPanel = ({
         ))}
       </div>
 
-      {} 
+      {/*performance display + sort button*/}
       <button className="confirm-sort-button" onClick={handleConfirmSort}>
         Sort Now
       </button>

@@ -6,11 +6,13 @@ import SortPanel from './components/SortPanel';
 import './styles/App.css';
 
 function App() {
+  //different states for sorting
   const [sortAlgorithm, setSortAlgorithm] = useState('heap');
   const [sortCriteria, setSortCriteria] = useState('date');
   const [sortTime, setSortTime] = useState(null);
   const [triggerSort, setTriggerSort] = useState(0);
 
+  //button clicker handler
   const handleSort = (algorithm, criteria) => {
     console.log(`App: Triggering sort with ${algorithm} by ${criteria}`);
     setSortAlgorithm(algorithm);
@@ -37,6 +39,7 @@ function App() {
             />
           </Routes>
         </main>
+        {/*control/sort panel*/}
         <SortPanel 
           onSort={handleSort} 
           sortTime={sortTime}

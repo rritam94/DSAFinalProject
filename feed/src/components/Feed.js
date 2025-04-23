@@ -3,10 +3,11 @@ import axios from 'axios';
 import Post from './Post';
 import '../styles/Feed.css';
 
+//this is the main component for showing everything (tweets)
 const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
-  const [allPosts, setAllPosts] = useState([]);
-  const [displayPosts, setDisplayPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [allPosts, setAllPosts] = useState([]); //stores all the laoded posts
+  const [displayPosts, setDisplayPosts] = useState([]); //shows the posts currently shown
+  const [loading, setLoading] = useState(true); //init loading
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadingSort, setLoadingSort] = useState(false);
   const [error, setError] = useState(null);
@@ -14,6 +15,7 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
   const [hasMore, setHasMore] = useState(true);
   const isMounted = useRef(true);
 
+  //effect for loading posts (runs when the page changes)
   useEffect(() => {
     isMounted.current = true;
 
@@ -32,8 +34,10 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
       setError(null);
 
       try {
+        //load the tweets from JSON file
         const data = (await import('../data/twitter_sample_100k.json')).default;
         
+        //pagination stuff
         const postsPerPage = 20;
         const startIndex = (page - 1) * postsPerPage;
         const endIndex = startIndex + postsPerPage;
@@ -46,6 +50,7 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
         }
 
         if (newPostsRaw.length > 0) {
+          //reformat data so that it can be used properly
           const newPosts = newPostsRaw.map(rawPost => ({
             id: String(rawPost.id),
             username: rawPost.user,
@@ -82,6 +87,7 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
 
   }, [page]);
 
+  //effect for sorting posts (runs when sort is triggered)
   useEffect(() => {
     if (triggerSort === 0 || allPosts.length === 0) return;
     isMounted.current = true; 
@@ -93,6 +99,7 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
       setSortTime(null);
 
       try {
+        //send teh posts to the backend so they can be sorted
         const backendUrl = 'http://localhost:5001/sort';
         const postsToSort = allPosts; 
         
@@ -111,6 +118,7 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
           if (sortedData && Array.isArray(sortedData)) {
               console.log('Feed: Current displayPosts state (first 5):', displayPosts.slice(0, 5));
 
+              //Update the state now with the sorted data
               const newSortedArray = [...sortedData]; 
               
               setAllPosts(newSortedArray);
@@ -144,16 +152,19 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
 
   }, [triggerSort, algorithm, criteria]); 
 
+  //When button pressed, load more posts
   const handleLoadMore = () => {
     if (!loadingMore && !loadingSort && hasMore) {
       setPage(prevPage => prevPage + 1);
     }
   };
 
+  //loading state
   if (loading && displayPosts.length === 0) {
     return <div className="loading">Loading posts...</div>;
   }
 
+  //error state
   if (error && displayPosts.length === 0) { 
     return <div className="error">Error: {error}</div>;
   }
@@ -165,15 +176,17 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
       <div className="feed-header">
         <h2>Home</h2>
         {loadingSort && <div className="loading-sort">Sorting...</div>}
-        {error && !loadingSort && <div className="error feed-error">Error: {error}</div>} {/*Show non-fatal errors */} 
+        {error && !loadingSort && <div className="error feed-error">Error: {error}</div>} 
       </div>
 
+      {/*display posts*/}
       <div className="posts">
         {displayPosts.map((post, index) => (
           <Post key={`${post.id}-${index}`} post={post} />
         ))}
       </div>
 
+      {/*loading + end of feed states*/}
       {loadingMore && <div className="loading">Loading more posts...</div>}
 
       {!loadingSort && !loadingMore && hasMore && (
