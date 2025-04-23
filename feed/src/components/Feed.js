@@ -17,16 +17,22 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
   useEffect(() => {
     isMounted.current = true;
 
+    if (triggerSort > 0) {
+      return;
+    }
+
     if (!hasMore) {
-        setLoading(false);
-        setLoadingMore(false);
-        return; 
+      setLoading(false);
+      setLoadingMore(false);
+      return; 
     }
 
     const fetchPosts = async () => {
       if (page === 1) {
         setLoading(true); 
-      } else {
+      } 
+      
+      else {
         setLoadingMore(true);
       }
       setError(null);
@@ -80,12 +86,11 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
 
     return () => { isMounted.current = false; };
 
-  }, [page]);
+  }, [page, triggerSort, hasMore]);
 
   useEffect(() => {
     if (triggerSort === 0 || allPosts.length === 0) return;
-    isMounted.current = true; 
-
+    
     const sortPosts = async () => {
       console.log(`Feed: Sorting triggered. Algorithm: ${algorithm}, Criteria: ${criteria}`);
       setLoadingSort(true);
@@ -93,38 +98,54 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
       setSortTime(null);
 
       try {
-        const backendUrl = 'http://localhost:5001/sort';
-        const postsToSort = allPosts; 
+        const allJsonData = (await import('../data/twitter_sample_100k.json')).default;
         
-        console.log(`Feed: Sending ${postsToSort.length} posts to backend for sorting.`);
-
+        const allFormattedPosts = allJsonData.map(rawPost => ({
+          id: String(rawPost.id),
+          username: rawPost.user,
+          displayName: rawPost.user,
+          content: rawPost.tweet,
+          timestamp: rawPost.date,
+          likes: parseInt(rawPost.likes) || 0,
+          retweets: parseInt(rawPost.retweets) || 0,
+          replies: parseInt(rawPost.replies) || 0,
+        })).filter(p => p.id && p.username && p.content && p.timestamp);
+        
+        console.log(`Feed: Sending all ${allFormattedPosts.length} posts from JSON to backend for sorting.`);
+        
+        const backendUrl = 'http://localhost:5001/sort';
         const response = await axios.post(backendUrl, {
-          tweets: postsToSort, 
+          tweets: allFormattedPosts, 
           criteria: criteria,
           algorithm: algorithm
         });
 
-        if (isMounted.current) {
-          console.log('Feed: Received sorted data from backend:', response.data?.sorted_tweets?.slice(0, 5)); 
-          const sortedData = response.data.sorted_tweets;
+        if (!isMounted.current) return;
 
-          if (sortedData && Array.isArray(sortedData)) {
-              console.log('Feed: Current displayPosts state (first 5):', displayPosts.slice(0, 5));
+        console.log('Feed: Received sorted data from backend:', response.data?.sorted_tweets?.slice(0, 5)); 
+        const sortedData = response.data.sorted_tweets;
 
-              const newSortedArray = [...sortedData]; 
-              
-              setAllPosts(newSortedArray);
-              setDisplayPosts(newSortedArray);
-              
-              console.log('Feed: Set displayPosts state with new array (first 5):', newSortedArray.slice(0, 5));
-              
-              setSortTime(response.data.sort_time_ms);
-          } else {
-              console.error('Feed: Received invalid sorted data format from backend');
-              setError('Received invalid sorted data format from backend.');
-          }
+        if (sortedData && Array.isArray(sortedData)) {
+            console.log(`Feed: Setting ${sortedData.length} sorted posts`);
+            
+            setDisplayPosts([]);
+            
+            setAllPosts(sortedData);
+            
+            const postsPerPage = 20;
+            setTimeout(() => {
+              if (isMounted.current) {
+                setDisplayPosts(sortedData.slice(0, postsPerPage));
+                setPage(1);
+                setHasMore(sortedData.length > postsPerPage);
+                setSortTime(response.data.sort_time_ms);
+                console.log('Feed: Display updated with sorted posts');
+              }
+            }, 0);
+        } else {
+            console.error('Feed: Received invalid sorted data format from backend');
+            setError('Received invalid sorted data format from backend.');
         }
-
       } catch (err) {
         if (isMounted.current) {
           console.error('Error sorting posts:', err);
@@ -141,12 +162,25 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
     sortPosts();
     
     return () => { isMounted.current = false; };
-
-  }, [triggerSort, algorithm, criteria]); 
+  }, [triggerSort, algorithm, criteria]);
 
   const handleLoadMore = () => {
     if (!loadingMore && !loadingSort && hasMore) {
-      setPage(prevPage => prevPage + 1);
+      const postsPerPage = 20;
+      const nextPage = page + 1;
+      const startIndex = (nextPage - 1) * postsPerPage;
+      const endIndex = startIndex + postsPerPage;
+      
+      setDisplayPosts(prevPosts => [
+        ...prevPosts,
+        ...allPosts.slice(startIndex, endIndex)
+      ]);
+      
+      setPage(nextPage);
+      
+      if (endIndex >= allPosts.length) {
+        setHasMore(false);
+      }
     }
   };
 
@@ -165,7 +199,7 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
       <div className="feed-header">
         <h2>Home</h2>
         {loadingSort && <div className="loading-sort">Sorting...</div>}
-        {error && !loadingSort && <div className="error feed-error">Error: {error}</div>} {/*Show non-fatal errors */} 
+        {error && !loadingSort && <div className="error feed-error">Error: {error}</div>} 
       </div>
 
       <div className="posts">
@@ -184,13 +218,6 @@ const Feed = ({ algorithm, criteria, setSortTime, triggerSort }) => {
         </div>
       )}
 
-      {!loadingSort && !loadingMore && !hasMore && displayPosts.length > 0 && (
-        <div className="end-message">You've reached the end of the feed.</div>
-      )}
-      
-      {!loading && !loadingMore && !hasMore && displayPosts.length === 0 && (
-          <div className="end-message">No posts to display.</div>
-      )}
     </div>
   );
 };

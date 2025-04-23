@@ -7,21 +7,46 @@ const SortPanel = ({
   currentAlgorithm,
   currentCriteria,
   setAlgorithm,
-  setCriteria
+  setCriteria,
+  onRestore
 }) => {
-  const criteriaOptions = ['date', 'user', 'likes', 'retweets', 'replies', 'id'];
+  const criteriaOptions = ['date', 'user', 'likes', 'retweets', 'replies'];
   const algorithmOptions = ['heap', 'counting'];
 
+  const [localCriteria, setLocalCriteria] = React.useState(currentCriteria);
+  const [localAlgorithm, setLocalAlgorithm] = React.useState(currentAlgorithm);
+
+  React.useEffect(() => {
+    setLocalCriteria(currentCriteria);
+    setLocalAlgorithm(currentAlgorithm);
+  }, []);
+
   const handleCriteriaClick = (crit) => {
-    setCriteria(crit); 
+    setLocalCriteria(crit);
   };
 
   const handleAlgoClick = (algo) => {
-    setAlgorithm(algo);
+    setLocalAlgorithm(algo);
   }
 
   const handleConfirmSort = () => {
-    onSort(currentAlgorithm, currentCriteria);
+    setCriteria(localCriteria);
+    setAlgorithm(localAlgorithm);
+    onSort(localAlgorithm, localCriteria);
+  };
+
+  const handleRestoreOriginal = () => {
+    setLocalCriteria('date');
+    setLocalAlgorithm('heap');
+    
+    setCriteria('date');
+    setAlgorithm('heap');
+    
+    if (typeof onRestore === 'function') {
+      onRestore();
+    } else {
+      window.location.reload();
+    }
   };
 
   return (
@@ -34,7 +59,7 @@ const SortPanel = ({
           <button 
             key={algo} 
             onClick={() => handleAlgoClick(algo)}
-            className={currentAlgorithm === algo ? 'active' : ''}
+            className={localAlgorithm === algo ? 'active' : ''}
           >
             {algo === 'heap' ? 'Heap Sort' : 'Counting Sort'}
           </button>
@@ -47,16 +72,19 @@ const SortPanel = ({
           <button 
             key={crit} 
             onClick={() => handleCriteriaClick(crit)}
-            className={currentCriteria === crit ? 'active' : ''}
+            className={localCriteria === crit ? 'active' : ''}
           >
             {crit.charAt(0).toUpperCase() + crit.slice(1)} 
           </button>
         ))}
       </div>
 
-      {} 
       <button className="confirm-sort-button" onClick={handleConfirmSort}>
         Sort Now
+      </button>
+
+      <button className="restore-button" onClick={handleRestoreOriginal}>
+        Restore Original Order
       </button>
 
       {sortTime !== null && (
