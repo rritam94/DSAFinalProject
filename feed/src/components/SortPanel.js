@@ -1,6 +1,7 @@
 import React from 'react';
 import '../styles/SortPanel.css';
 
+//control panel
 const SortPanel = ({ 
   onSort, 
   sortTime,
@@ -10,25 +11,21 @@ const SortPanel = ({
   setCriteria,
   onRestore
 }) => {
-  const criteriaOptions = ['date', 'user', 'likes', 'retweets', 'replies'];
+  //sorting options
+  const criteriaOptions = ['date', 'user', 'likes', 'retweets', 'replies', 'id'];
   const algorithmOptions = ['heap', 'counting'];
 
-  const [localCriteria, setLocalCriteria] = React.useState(currentCriteria);
-  const [localAlgorithm, setLocalAlgorithm] = React.useState(currentAlgorithm);
-
-  React.useEffect(() => {
-    setLocalCriteria(currentCriteria);
-    setLocalAlgorithm(currentAlgorithm);
-  }, []);
-
+  //updated the selected options
   const handleCriteriaClick = (crit) => {
     setLocalCriteria(crit);
   };
 
+  //updated algo
   const handleAlgoClick = (algo) => {
     setLocalAlgorithm(algo);
   }
 
+  //init actual sort operation
   const handleConfirmSort = () => {
     setCriteria(localCriteria);
     setAlgorithm(localAlgorithm);
@@ -53,6 +50,7 @@ const SortPanel = ({
     <div className="sort-panel">
       <h3>Sort Tweets</h3>
       
+      {/*algo select buttons*/}
       <div className="sort-group">
         <h4>Algorithm:</h4>
         {algorithmOptions.map(algo => (
@@ -66,6 +64,7 @@ const SortPanel = ({
         ))}
       </div>
 
+      {/*Criteria select buttons*/}
       <div className="sort-group">
         <h4>Criteria:</h4>
         {criteriaOptions.map(crit => (
@@ -79,6 +78,7 @@ const SortPanel = ({
         ))}
       </div>
 
+      {/*performance display + sort button*/}
       <button className="confirm-sort-button" onClick={handleConfirmSort}>
         Sort Now
       </button>

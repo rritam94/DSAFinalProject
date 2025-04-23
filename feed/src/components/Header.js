@@ -6,9 +6,15 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
+        {/*Logo/home link*/}
         <Link to="/" className="logo">
           <h1>Twitter Feed</h1>
         </Link>
+        
+        {/*nav menu*/}
+        <nav className="nav">
+          <Link to="/" className="nav-link">Home</Link>
+        </nav>
       </div>
     </header>
   );
