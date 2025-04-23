@@ -124,19 +124,19 @@ def get_number(item_data, key_name):
         return 0
 
 def heapify_by_number(data_array, size, root_index, key_name):
-    smallest_index = root_index
+    largest_index = root_index
     left_child = 2 * root_index + 1
     right_child = 2 * root_index + 2
     
-    if left_child < size and get_number(data_array[left_child], key_name) < get_number(data_array[smallest_index], key_name):
-        smallest_index = left_child
+    if left_child < size and get_number(data_array[left_child], key_name) > get_number(data_array[largest_index], key_name):
+        largest_index = left_child
         
-    if right_child < size and get_number(data_array[right_child], key_name) < get_number(data_array[smallest_index], key_name):
-        smallest_index = right_child
+    if right_child < size and get_number(data_array[right_child], key_name) > get_number(data_array[largest_index], key_name):
+        largest_index = right_child
         
-    if smallest_index != root_index:
-        data_array[root_index], data_array[smallest_index] = data_array[smallest_index], data_array[root_index]
-        heapify_by_number(data_array, size, smallest_index, key_name)
+    if largest_index != root_index:
+        data_array[root_index], data_array[largest_index] = data_array[largest_index], data_array[root_index]
+        heapify_by_number(data_array, size, largest_index, key_name)
 
 def heap_sort_by_number(data_array, key_name):
     array_length = len(data_array)
