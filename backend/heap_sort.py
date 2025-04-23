@@ -1,6 +1,48 @@
 import json
 from datetime import datetime
 
+def get_date(tweet):
+    timestamp_string = tweet.get('timestamp')
+    
+    if not timestamp_string:
+        return datetime.min
+    
+    try:
+        if timestamp_string.endswith('Z'):
+            return datetime.fromisoformat(timestamp_string.replace('Z', '+00:00'))
+        
+        return datetime.fromisoformat(timestamp_string)
+    
+    except ValueError:
+        print('cant parse date')
+    
+def heapify_by_date(tweets_array, size, root_index):
+    largest_index = root_index
+    left_child = 2 * root_index + 1
+    right_child = 2 * root_index + 2
+    
+    if left_child < size and get_date(tweets_array[left_child]) > get_date(tweets_array[largest_index]):
+        largest_index = left_child
+        
+    if right_child < size and get_date(tweets_array[right_child]) > get_date(tweets_array[largest_index]):
+        largest_index = right_child
+        
+    if largest_index != root_index:
+        tweets_array[root_index], tweets_array[largest_index] = tweets_array[largest_index], tweets_array[root_index]
+        heapify_by_date(tweets_array, size, largest_index)
+
+def heap_sort_by_date(tweets_array):
+    array_length = len(tweets_array)
+    
+    for index in range(array_length // 2 - 1, -1, -1):
+        heapify_by_date(tweets_array, array_length, index)
+        
+    for index in range(array_length - 1, 0, -1):
+        tweets_array[0], tweets_array[index] = tweets_array[index], tweets_array[0]
+        heapify_by_date(tweets_array, index, 0)
+    
+    return tweets_array
+
 def sort_by_date(data):
     if isinstance(data, str):
         with open(data, 'r') as file:
@@ -8,106 +50,112 @@ def sort_by_date(data):
     else:
         twitter_data = data
     
-    def get_date(item):
-        date_str = item.get('timestamp')
-        if not date_str:
-            return datetime.min
-        try:
-            if date_str.endswith('Z'):
-                return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-            return datetime.fromisoformat(date_str)
-        except ValueError:
-            print(f"Warning: Could not parse date: {date_str}")
-            return datetime.min
-    
-    def heapify_by_date(arr, n, i):
-        largest = i
-        l = 2 * i + 1
-        r = 2 * i + 2
-        
-        if l < n and get_date(arr[l]) > get_date(arr[largest]):
-            largest = l
-            
-        if r < n and get_date(arr[r]) > get_date(arr[largest]):
-            largest = r
-            
-        if largest != i:
-            arr[i], arr[largest] = arr[largest], arr[i]
-            heapify_by_date(arr, n, largest)
-    
-    def heap_sort_by_date(arr):
-        n = len(arr)
-        
-        for i in range(n // 2 - 1, -1, -1):
-            heapify_by_date(arr, n, i)
-            
-        for i in range(n - 1, 0, -1):
-            arr[0], arr[i] = arr[i], arr[0]
-            heapify_by_date(arr, i, 0)
-        
-        return arr
-    
     return heap_sort_by_date(twitter_data)
 
-def heapify(arr, n, i):
-    largest = i 
-    l = 2 * i + 1 
-    r = 2 * i + 2  
+def heapify(array, size, root_index):
+    largest_index = root_index 
+    left_child = 2 * root_index + 1 
+    right_child = 2 * root_index + 2  
 
-    # If left child is larger than root
-    if l < n and arr[l] > arr[largest]:
-        largest = l
+    if left_child < size and array[left_child] > array[largest_index]:
+        largest_index = left_child
 
-    if r < n and arr[r] > arr[largest]:
-        largest = r
-    if largest != i:
-        arr[i], arr[largest] = arr[largest], arr[i]
-        heapify(arr, n, largest)
+    if right_child < size and array[right_child] > array[largest_index]:
+        largest_index = right_child
+        
+    if largest_index != root_index:
+        array[root_index], array[largest_index] = array[largest_index], array[root_index]
+        heapify(array, size, largest_index)
 
-def heapSort(arr):
-    n = len(arr) 
-    for i in range(n // 2 - 1, -1, -1):
-        heapify(arr, n, i)
+def heapSort(array):
+    array_length = len(array) 
+    
+    for index in range(array_length // 2 - 1, -1, -1):
+        heapify(array, array_length, index)
 
-    for i in range(n - 1, 0, -1):
-        arr[0], arr[i] = arr[i], arr[0] 
-        heapify(arr, i, 0)
+    for index in range(array_length - 1, 0, -1):
+        array[0], array[index] = array[index], array[0] 
+        heapify(array, index, 0)
+
+def get_string(user_data):
+    return user_data.get('name', '').lower()
+
+def heapify_by_string(users_array, size, root_index):
+    largest_index = root_index
+    left_child = 2 * root_index + 1
+    right_child = 2 * root_index + 2
+    
+    if left_child < size and get_string(users_array[left_child]) > get_string(users_array[largest_index]):
+        largest_index = left_child
+        
+    if right_child < size and get_string(users_array[right_child]) > get_string(users_array[largest_index]):
+        largest_index = right_child
+        
+    if largest_index != root_index:
+        users_array[root_index], users_array[largest_index] = users_array[largest_index], users_array[root_index]
+        heapify_by_string(users_array, size, largest_index)
+
+def heap_sort_by_string(users_array):
+    array_length = len(users_array)
+    
+    for index in range(array_length // 2 - 1, -1, -1):
+        heapify_by_string(users_array, array_length, index)
+        
+    for index in range(array_length - 1, 0, -1):
+        users_array[0], users_array[index] = users_array[index], users_array[0]
+        heapify_by_string(users_array, index, 0)
+    
+    return users_array
 
 def sort_by_string(data):
     if isinstance(data, str):
         with open(data, 'r') as file:
-            json_data = json.load(file)
+            user_records = json.load(file)
     else:
-        json_data = data
+        user_records = data
     
-    def get_string(item):
-        return item.get('name', '').lower()
+    return heap_sort_by_string(user_records)
+
+def get_number(item_data, key_name):
+    try:
+        return int(item_data.get(key_name, 0))
     
-    def heapify_by_string(arr, n, i):
-        largest = i
-        l = 2 * i + 1
-        r = 2 * i + 2
+    except (ValueError, TypeError):
+        return 0
+
+def heapify_by_number(data_array, size, root_index, key_name):
+    smallest_index = root_index
+    left_child = 2 * root_index + 1
+    right_child = 2 * root_index + 2
+    
+    if left_child < size and get_number(data_array[left_child], key_name) < get_number(data_array[smallest_index], key_name):
+        smallest_index = left_child
         
-        if l < n and get_string(arr[l]) > get_string(arr[largest]):
-            largest = l
-            
-        if r < n and get_string(arr[r]) > get_string(arr[largest]):
-            largest = r
-            
-        if largest != i:
-            arr[i], arr[largest] = arr[largest], arr[i]
-            heapify_by_string(arr, n, largest)
-    
-    def heap_sort_by_string(arr):
-        n = len(arr)
+    if right_child < size and get_number(data_array[right_child], key_name) < get_number(data_array[smallest_index], key_name):
+        smallest_index = right_child
         
-        for i in range(n // 2 - 1, -1, -1):
-            heapify_by_string(arr, n, i)
-        for i in range(n - 1, 0, -1):
-            arr[0], arr[i] = arr[i], arr[0]
-            heapify_by_string(arr, i, 0)
-        
-        return arr
+    if smallest_index != root_index:
+        data_array[root_index], data_array[smallest_index] = data_array[smallest_index], data_array[root_index]
+        heapify_by_number(data_array, size, smallest_index, key_name)
+
+def heap_sort_by_number(data_array, key_name):
+    array_length = len(data_array)
     
-    return heap_sort_by_string(json_data)
+    for index in range(array_length // 2 - 1, -1, -1):
+        heapify_by_number(data_array, array_length, index, key_name)
+        
+    for index in range(array_length - 1, 0, -1):
+        data_array[0], data_array[index] = data_array[index], data_array[0]
+        heapify_by_number(data_array, index, 0, key_name)
+    
+    return data_array
+
+def sort_by_number(data, key_name):
+    if isinstance(data, str):
+        with open(data, 'r') as file:
+            numerical_data = json.load(file)
+    else:
+        numerical_data = data
+    
+    return heap_sort_by_number(numerical_data, key_name)
 

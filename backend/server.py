@@ -1,149 +1,141 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import time
-import json
-import os
 from datetime import datetime
-import traceback
 
-from heap_sort import sort_by_date, sort_by_string
-from countingSort import countingSort, countingSort_tup
+from heap_sort import sort_by_date as heap_sort_by_date, sort_by_string as heap_sort_by_string, sort_by_number as heap_sort_by_number
+from counting_sort import sort_by_date as counting_sort_by_date, sort_by_string as counting_sort_by_string, sort_by_number as counting_sort_by_number
 
-def get_date_key(item):
-    timestamp_str = item.get('timestamp')
-    if not timestamp_str: return None
+
+def get_date_key(tweet_data):
+    timestamp_string = tweet_data.get('timestamp')
+    
+    if not timestamp_string: 
+        return None
+    
     try:
-        return datetime.fromisoformat(timestamp_str)
+        return datetime.fromisoformat(timestamp_string)
+    
     except ValueError:
-        print(f"Warning: Could not parse date: {timestamp_str}")
+        print("couldn't parse date")
         return None
 
-def get_user_key(item):
-    user = item.get('username')
-    return user.lower() if user else ''
 
-def get_likes_key(item):
+def get_user_key(tweet_data):
+    username = tweet_data.get('username')
+    
+    return username.lower() if username else ''
+
+
+def get_likes_key(tweet_data):
     try:
-        return int(item.get('likes', 0))
+        return int(tweet_data.get('likes', 0))
+    
     except (ValueError, TypeError):
         return 0
 
-def get_retweets_key(item):
+
+def get_retweets_key(tweet_data):
     try:
-        return int(item.get('retweets', 0))
+        return int(tweet_data.get('retweets', 0))
+    
     except (ValueError, TypeError):
         return 0
 
-def get_replies_key(item):
+
+def get_replies_key(tweet_data):
     try:
-        return int(item.get('replies', 0))
+        return int(tweet_data.get('replies', 0))
+    
     except (ValueError, TypeError):
         return 0
 
-def get_id_key(item):
+
+def get_id_key(tweet_data):
     try:
-        return int(float(item.get('id', 0)))
+        return int(float(tweet_data.get('id', 0)))
+    
     except (ValueError, TypeError):
          return 0
+
 
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route('/sort', methods=['POST'])
 def sort_tweets():
     try:
-        data = request.get_json()
-        tweets = data.get('tweets')
-        criteria = data.get('criteria')
-        algorithm = data.get('algorithm')
-
-        if not tweets:
-             return jsonify({"sorted_tweets": [], "sort_time_ms": 0})
-        if not criteria or not algorithm:
-            return jsonify({"error": "Missing required parameters: criteria or algorithm"}), 400
-
-        print(f"Received request to sort {len(tweets)} tweets by '{criteria}' using '{algorithm}' sort.")
+        request_data = request.get_json()
+        tweets = request_data.get('tweets')
+        sort_criteria = request_data.get('criteria')
+        sort_algorithm = request_data.get('algorithm')
 
         start_time = time.time()
         sorted_tweets = []
         error_message = None
 
-        if algorithm == 'heap':
-            print(f"Attempting heap sort by {criteria}")
+        if sort_algorithm == 'heap':
+            print(f"Attempting heap sort by {sort_criteria}")
+            
             try:
-                if criteria == 'date':
-                    sorted_tweets = sort_by_date(list(tweets))
-                elif criteria == 'user':
+                if sort_criteria == 'date':
+                    sorted_tweets = heap_sort_by_date(list(tweets))
+                
+                elif sort_criteria == 'user':
                     for tweet in tweets:
                         tweet['name'] = tweet.get('username', '')
-                    sorted_tweets = sort_by_string(list(tweets))
+                    
+                    sorted_tweets = heap_sort_by_string(list(tweets))
+                    
                     for tweet in sorted_tweets:
                         if 'name' in tweet:
                             del tweet['name']
-                else:
-                    tweet_tuples = []
-                    
-                    if criteria == 'likes':
-                        for tweet in tweets:
-                            tweet_tuples.append((tweet, get_likes_key(tweet)))
-                    elif criteria == 'retweets':
-                        for tweet in tweets:
-                            tweet_tuples.append((tweet, get_retweets_key(tweet)))
-                    elif criteria == 'replies':
-                        for tweet in tweets:
-                            tweet_tuples.append((tweet, get_replies_key(tweet)))
-                    elif criteria == 'id':
-                        for tweet in tweets:
-                            tweet_tuples.append((tweet, get_id_key(tweet)))
-                    
-                    sorted_tuples = countingSort_tup(tweet_tuples, 1)
-                    sorted_tweets = [t[0] for t in sorted_tuples]
-                    
-                    if criteria in ['likes', 'retweets', 'replies']:
-                        sorted_tweets.reverse()
-                    
+                
+                elif sort_criteria == 'likes':
+                    sorted_tweets = heap_sort_by_number(list(tweets), 'likes')
+                
+                elif sort_criteria == 'retweets':
+                    sorted_tweets = heap_sort_by_number(list(tweets), 'retweets')
+                
+                elif sort_criteria == 'replies':
+                    sorted_tweets = heap_sort_by_number(list(tweets), 'replies')
+                
+                elif sort_criteria == 'id':
+                    sorted_tweets = heap_sort_by_number(list(tweets), 'id')
+            
             except Exception as e:
-                traceback.print_exc()
-                error_message = f"Error during heap sort: {e}"
-
-        elif algorithm == 'counting':
-            print(f"Attempting counting sort by {criteria}")
+                x = 2
+        
+        elif sort_algorithm == 'counting':
             try:
-                tweet_tuples = []
+                if sort_criteria == 'date':
+                    sorted_tweets = counting_sort_by_date(list(tweets))
                 
-                if criteria == 'likes':
+                elif sort_criteria == 'user':
                     for tweet in tweets:
-                        tweet_tuples.append((tweet, get_likes_key(tweet)))
-                elif criteria == 'retweets':
-                    for tweet in tweets:
-                        tweet_tuples.append((tweet, get_retweets_key(tweet)))
-                elif criteria == 'replies':
-                    for tweet in tweets:
-                        tweet_tuples.append((tweet, get_replies_key(tweet)))
-                elif criteria == 'id':
-                    for tweet in tweets:
-                        tweet_tuples.append((tweet, get_id_key(tweet)))
-                elif criteria == 'user':
-                    for tweet in tweets:
-                        tweet_tuples.append((tweet, get_user_key(tweet)))
-                elif criteria == 'date':
-                    for tweet in tweets:
-                        timestamp = tweet.get('timestamp', '')
-                        if timestamp is None:
-                            timestamp = ''
-                        else:
-                            timestamp = timestamp.lower().replace('t', ' ')
-                        tweet_tuples.append((tweet, timestamp))
+                        tweet['name'] = tweet.get('username', '')
+                    
+                    sorted_tweets = counting_sort_by_string(list(tweets))
+                    
+                    for tweet in sorted_tweets:
+                        if 'name' in tweet:
+                            del tweet['name']
                 
-                sorted_tuples = countingSort_tup(tweet_tuples, 1)
-                sorted_tweets = [t[0] for t in sorted_tuples]
+                elif sort_criteria == 'likes':
+                    sorted_tweets = counting_sort_by_number(list(tweets), 'likes')
+                
+                elif sort_criteria == 'retweets':
+                    sorted_tweets = counting_sort_by_number(list(tweets), 'retweets')
+                
+                elif sort_criteria == 'replies':
+                    sorted_tweets = counting_sort_by_number(list(tweets), 'replies')
+                
+                elif sort_criteria == 'id':
+                    sorted_tweets = counting_sort_by_number(list(tweets), 'id')
 
-                if criteria in ['likes', 'retweets', 'replies', 'date']:
-                    sorted_tweets.reverse()
-                
             except Exception as e:
-                traceback.print_exc()
-                error_message = f"Error during counting sort: {e}"
+                x = 2
             
         else:
             error_message = "Invalid algorithm specified"
@@ -155,7 +147,6 @@ def sort_tweets():
              print(f"Error during sorting: {error_message}")
              return jsonify({"error": error_message}), 400 
 
-        print(f"Sorting finished in {sort_duration:.2f} ms. Returning {len(sorted_tweets)} sorted tweets.")
 
         return jsonify({
             "sorted_tweets": sorted_tweets,
@@ -163,9 +154,8 @@ def sort_tweets():
         })
 
     except Exception as e:
-        print(f"An error occurred in /sort endpoint: {e}")
-        traceback.print_exc()
         return jsonify({"error": f"An internal server error occurred: {e}"}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001) 
